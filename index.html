@@ -15,7 +15,7 @@
         physics: {
             default: 'arcade',
             arcade: {
-                gravity: { y: 200 }
+                gravity: { y: 0 }
             }
         },
         scene: {
@@ -26,18 +26,21 @@
 
     var game = new Phaser.Game(config);
 
-    function preload ()
+    function preload()
     {
         this.load.setBaseURL('.');
 
-        this.load.image('sky', 'assets/background.png');
-        // this.load.image('logo', 'assets/sprites/phaser3-logo.png');
-        // this.load.image('red', 'assets/particles/red.png');
+        this.load.image('space', 'assets/background.png');
+        this.load.image('ship', 'assets/ship.png');
+        this.load.image('enemy', 'assets/enemy.png');
     }
 
-    function create ()
+    function create()
     {
-        this.add.image(400, 300, 'sky');
+        this.add.image(400, 300, 'space');
+        this.add.image(400, 570, 'ship');
+        let enemies = createEnemies(this);
+        
 
         // var particles = this.add.particles('red');
 
@@ -54,6 +57,24 @@
         // logo.setCollideWorldBounds(true);
 
         // emitter.startFollow(logo);
+    }
+
+    function createEnemies(context) {
+        let enemies = context.physics.add.staticGroup();
+
+        let startX = 170, startY = 100, step = 14;
+
+        for(let i = 0; i < 11; i++) {
+            for(let j = 0; j < 5; j++) {
+                enemies.create(startX + i * (32 + step), startY + j * (26 + step), 'enemy');
+            }
+        }
+
+        return enemies;
+    }
+
+    function update() {
+
     }
     </script>
 
