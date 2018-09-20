@@ -19,15 +19,15 @@ public class AlienSwarm {
         aliens = new Alien[COLS][ROWS];
         createAliens();
 
-        width = COLS * (gap + 32);
-//        height = ROWS * (gap + 26);
+        width = COLS * (gap + 26);
+//        height = ROWS * (gap + 20);
     }
 
     private void createAliens() {
         for (int i = 0; i < COLS; i++) {
             for (int j = 0; j < ROWS; j++) {
                 Alien alien = new Alien();
-                alien.setPosition(positionX + i * (32 + gap), positionY + j * (26 + gap));
+                alien.setPosition(positionX + i * (26 + gap), positionY + j * (20 + gap));
                 aliens[i][j] = alien;
             }
         }
@@ -51,8 +51,8 @@ public class AlienSwarm {
                 Alien alien = aliens[i][j];
 
                 if(alien != null) {
-                    double x = positionX + i * (32 + gap);
-                    double y = positionY + j * (26 + gap);
+                    double x = positionX + i * (26 + gap);
+                    double y = positionY + j * (20 + gap);
                     alien.setPosition(x, y);
 
 //                alien.setPosition(positionX + i * (32 + gap), positionY + j * (26 + gap));

@@ -4,7 +4,7 @@ import javafx.scene.image.Image;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.geometry.Rectangle2D;
 
-public class Sprite
+public abstract class Sprite
 {
     private Image image;
     private double positionX;
@@ -84,6 +84,14 @@ public class Sprite
 
     public double getY() {
         return positionY;
+    }
+
+    public double getWidth() {
+        return image.getWidth();
+    }
+
+    public double getHeight() {
+        return image.getHeight();
     }
 
     public String toString()

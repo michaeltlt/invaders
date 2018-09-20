@@ -16,4 +16,8 @@ public class Alien extends Sprite {
     public boolean isAlive() {
         return alive;
     }
+
+//    public void setRelativePosition(double x, double y, double gap) {
+//        setPosition(x + i * (26 + gap), y + j * (20 + gap));
+//    }
 }

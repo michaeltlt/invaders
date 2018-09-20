@@ -92,13 +92,6 @@ public class Main extends Application {
                     bullet.render(gc);
                 });
 
-                // collision detection
-//                bullets.stream().forEach(bullet -> {
-//                    if(bullet.getY() <= 30) {
-//                        bullets.remove(bullet);
-//                    }
-//                });
-
                 Iterator<Bullet> bulletIter = bullets.iterator();
 
                 while(bulletIter.hasNext()) {
@@ -110,7 +103,6 @@ public class Main extends Application {
 
                     if(swarm.intersects(bullet)) {
                         bullet.explode();
-                        System.out.println("Gotcha!");
                         bulletIter.remove();
                     }
                 }
