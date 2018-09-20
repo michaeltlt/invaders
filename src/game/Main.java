@@ -19,11 +19,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-//        Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-//        primaryStage.setTitle("Hello World");
-//        primaryStage.setScene(new Scene(root, 800, 600));
-//        primaryStage.show();
-        primaryStage.setTitle( "Canvas Example" );
+        primaryStage.setTitle("Canvas Example");
 
         Group root = new Group();
         Scene theScene = new Scene( root );
@@ -39,6 +35,8 @@ public class Main extends Application {
         ship.setPosition(canvas.getWidth() / 2 - 24, canvas.getHeight() - 60);
 
         AlienSwarm swarm = new AlienSwarm();
+        List<Bullet> bullets = new LinkedList<>();
+
 
         Set<KeyCode> input = new HashSet<>();
         Set<KeyCode> validCodes = new HashSet<>();
@@ -55,26 +53,27 @@ public class Main extends Application {
 
         theScene.setOnKeyReleased(event -> input.remove(event.getCode()));
 
-        List<Bullet> bullets = new ArrayList<>();
-
         new AnimationTimer() {
             long lastNanoTime = System.nanoTime();
+
             @Override
             public void handle(long currentNanoTime) {
                 // calculate time since last update.
-                double elapsedTime = (currentNanoTime - lastNanoTime) / 1000000000.0;
+                double elapsedTime = (currentNanoTime - lastNanoTime) / 1_000_000_000.0;
                 lastNanoTime = currentNanoTime;
+
+                ship.reload(elapsedTime);
 
                 gc.drawImage(earth, 0, 0);
                 ship.stop();
 
                 if(input.contains(KeyCode.LEFT) && input.contains(KeyCode.SPACE)) {
                     ship.left();
-                    bullets.add(ship.fire());
+                    if(ship.canFire()) bullets.add(ship.fire());
                 }
                 else if(input.contains(KeyCode.RIGHT) && input.contains(KeyCode.SPACE)) {
                     ship.right();
-                    bullets.add(ship.fire());
+                    if(ship.canFire()) bullets.add(ship.fire());
                 }
                 else if(input.contains(KeyCode.LEFT)) {
                     ship.left();
@@ -83,7 +82,7 @@ public class Main extends Application {
                     ship.right();
                 }
                 else if(input.contains(KeyCode.SPACE)) {
-                    bullets.add(ship.fire());
+                    if(ship.canFire()) bullets.add(ship.fire());
                 }
 
                 ship.update(elapsedTime);
@@ -94,6 +93,28 @@ public class Main extends Application {
                 });
 
                 // collision detection
+//                bullets.stream().forEach(bullet -> {
+//                    if(bullet.getY() <= 30) {
+//                        bullets.remove(bullet);
+//                    }
+//                });
+
+                Iterator<Bullet> bulletIter = bullets.iterator();
+
+                while(bulletIter.hasNext()) {
+                    Bullet bullet = bulletIter.next();
+
+                    if(bullet.getY() <= 30) {
+                        bulletIter.remove();
+                    }
+
+                    if(swarm.intersects(bullet)) {
+                        bullet.explode();
+                        System.out.println("Gotcha!");
+                        bulletIter.remove();
+                    }
+                }
+
 
                 ship.render(gc);
                 swarm.render(gc);
@@ -103,7 +124,6 @@ public class Main extends Application {
 
         primaryStage.show();
     }
-
 
     public static void main(String[] args) {
         launch(args);

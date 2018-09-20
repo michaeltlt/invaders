@@ -65,7 +65,7 @@ public class Sprite
 
     public void render(GraphicsContext gc)
     {
-        gc.drawImage( image, positionX, positionY );
+        gc.drawImage(image, positionX, positionY);
     }
 
     public Rectangle2D getBoundary()
@@ -75,7 +75,7 @@ public class Sprite
 
     public boolean intersects(Sprite s)
     {
-        return s.getBoundary().intersects( this.getBoundary() );
+        return s.getBoundary().intersects(this.getBoundary());
     }
 
     public double getX() {
