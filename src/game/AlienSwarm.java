@@ -70,18 +70,18 @@ public class AlienSwarm {
         }
     }
 
-    public boolean intersects(Bullet bullet) {
+    public Alien intersects(Bullet bullet) {
         for (int i = 0; i < COLS; i++) {
             for (int j = 0; j < ROWS; j++) {
                 Alien alien = aliens[i][j];
 
                 if(alien != null && alien.intersects(bullet)) {
                     aliens[i][j] = null;
-                    return true;
+                    return alien;
                 }
             }
         }
 
-        return false;
+        return null;
     }
 }

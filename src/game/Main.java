@@ -22,11 +22,11 @@ public class Main extends Application {
         primaryStage.setTitle("Canvas Example");
 
         Group root = new Group();
-        Scene theScene = new Scene( root );
-        primaryStage.setScene( theScene );
+        Scene theScene = new Scene(root);
+        primaryStage.setScene(theScene);
 
         Canvas canvas = new Canvas(800, 600);
-        root.getChildren().add( canvas );
+        root.getChildren().add(canvas);
 
         GraphicsContext gc = canvas.getGraphicsContext2D();
         Image earth = new Image("file:assets/background.png");
@@ -36,6 +36,7 @@ public class Main extends Application {
 
         AlienSwarm swarm = new AlienSwarm();
         List<Bullet> bullets = new LinkedList<>();
+        List<Explosion> explosions = new LinkedList<>();
 
 
         Set<KeyCode> input = new HashSet<>();
@@ -101,12 +102,29 @@ public class Main extends Application {
                         bulletIter.remove();
                     }
 
-                    if(swarm.intersects(bullet)) {
+                    Alien damagedAlien = swarm.intersects(bullet);
+
+                    if(damagedAlien != null) {
+                        Explosion explosion = new Explosion(damagedAlien.getX() - 3, damagedAlien.getY() - 6);
+                        explosions.add(explosion);
+
                         bullet.explode();
                         bulletIter.remove();
                     }
                 }
 
+                Iterator<Explosion> explIter = explosions.iterator();
+
+                while(explIter.hasNext()) {
+                    Explosion explosion = explIter.next();
+
+                    if(explosion.isInProgress()) {
+                        explosion.render(gc);
+                    }
+                    else {
+                        explIter.remove();
+                    }
+                }
 
                 ship.render(gc);
                 swarm.render(gc);
