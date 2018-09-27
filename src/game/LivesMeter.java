@@ -2,10 +2,12 @@ package game;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 
 import static game.Constants.*;
 
-public class LivesMeter {
+public class LivesMeter extends HBox {
     private static final double POS_X = SCREEN_WIDTH - 120;
     private static final String FILE = "file:assets/life.png";
 
@@ -20,13 +22,23 @@ public class LivesMeter {
     private int lives;
 
     public LivesMeter() {
-        this.image = new Image(FILE);
-        this.imageWidth = image.getWidth();
-        this.imageHeight = image.getHeight();
-//        this.destWidth = imageWidth / 1.5;
-//        this.destHeight = imageHeight / 1.5;
-        this.positionX = imageWidth;
-        this.positionY = imageHeight - 25;
+        Image image = new Image(FILE);
+
+        reset();
+
+
+//        this.image = new Image(FILE);
+//        this.imageWidth = image.getWidth();
+//        this.imageHeight = image.getHeight();
+//        this.positionX = imageWidth;
+//        this.positionY = imageHeight - 25;
+    }
+
+    private void reset() {
+        for (int i = 0; i < LIVES; i++) {
+            ImageView imageView = new ImageView(image);
+            getChildren().add(imageView);
+        }
     }
 
     public void render(GraphicsContext gc) {
@@ -35,7 +47,8 @@ public class LivesMeter {
         }
     }
 
-    public void update(int lives) {
-        this.lives = lives;
+    public void decrease() {
+        lives--;
+        getChildren().remove(lives);
     }
 }

@@ -1,39 +1,51 @@
 package game;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
+
+
 import static game.Constants.*;
 
-public class Ship extends Sprite {
+public class Ship extends Pane {
     private static final String FILE = "file:assets/ship.png";
-    private static final double VELOCITY = 150.0;
+    private static final double VELOCITY = 10.0;
     private static final double RELOAD_TIME_SEC = 0.5;
 
     private double reloadingTime;
     private int lives = LIVES;
 
     public Ship() {
-        setImage(FILE);
+        Image image = new Image(FILE);
+        ImageView imageView = new ImageView(image);
+        getChildren().add(imageView);
         reset();
     }
 
     public void reset() {
-        setPosition(SCREEN_WIDTH / 2 - 24, SCREEN_HEIGHT - 60);
+        setTranslateX(SCREEN_WIDTH / 2 - 24);
+        setTranslateY(SCREEN_HEIGHT - 60);
     }
 
     public void left() {
-        addVelocity(-VELOCITY, 0.0);
+        double x = getTranslateX() - VELOCITY;
+
+        if(x < LEFT_BORDER) x = LEFT_BORDER;
+
+        setTranslateX(x);
     }
 
     public void right() {
-        addVelocity(VELOCITY, 0.0);
-    }
+        double x = getTranslateX() + VELOCITY;
 
-    public void stop() {
-        setVelocity(0.0, 0.0);
+        if(x + getWidth() > RIGHT_BORDER) x = RIGHT_BORDER - getWidth();
+
+        setTranslateX(x);
     }
 
     public Shot fire() {
         Shot bullet = new Bullet();
-        bullet.setPosition(getX() + 19, getY());
+        bullet.setPosition(getTranslateX() + 19, getTranslateY());
 
         return bullet;
     }

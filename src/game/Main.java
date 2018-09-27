@@ -2,12 +2,16 @@ package game;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.geometry.Bounds;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.util.*;
@@ -15,28 +19,40 @@ import java.util.*;
 import static game.Constants.*;
 
 public class Main extends Application {
+    private Ship ship;
+    private Score score;
+    private LivesMeter meter;
+    private AlienSwarm swarm;
+    private TopPanel topPanel;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
         primaryStage.setTitle(TITLE);
 
-        Group root = new Group();
-        Scene theScene = new Scene(root);
-        primaryStage.setScene(theScene);
+        Pane root = new Pane();
+        root.setPrefSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-        Canvas canvas = new Canvas(SCREEN_WIDTH, SCREEN_HEIGHT);
-        root.getChildren().add(canvas);
+        Image bgImage = new Image("file:assets/background.png");
+        ImageView bgImageView = new ImageView(bgImage);
 
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        Image earth = new Image("file:assets/background.png");
+        Scene scene = new Scene(root);
+        primaryStage.setScene(scene);
 
-        Ship ship = new Ship();
 
-        Score score = new Score(gc);
-        LivesMeter meter = new LivesMeter();
+//        Canvas canvas = new Canvas(SCREEN_WIDTH, SCREEN_HEIGHT);
+//        root.getChildren().add(canvas);
+//
+//        GraphicsContext gc = canvas.getGraphicsContext2D();
 
-        AlienSwarm swarm = new AlienSwarm();
+
+        ship = new Ship();
+//        score = new Score(gc);
+        meter = new LivesMeter();
+        swarm = new AlienSwarm();
         swarm.locate(ship);
+        topPanel = new TopPanel();
+
+        root.getChildren().addAll(bgImageView, ship, swarm, topPanel);
 
         List<Shot> bullets = new LinkedList<>();
         List<Explosion> explosions = new LinkedList<>();
@@ -47,7 +63,7 @@ public class Main extends Application {
         Collections.addAll(validCodes, KeyCode.LEFT, KeyCode.RIGHT, KeyCode.SPACE);
 
 
-        theScene.setOnKeyPressed(event -> {
+        scene.setOnKeyPressed(event -> {
             KeyCode code = event.getCode();
 
             if(validCodes.contains(code) && !input.contains(code)) {
@@ -55,7 +71,7 @@ public class Main extends Application {
             }
         });
 
-        theScene.setOnKeyReleased(event -> input.remove(event.getCode()));
+        scene.setOnKeyReleased(event -> input.remove(event.getCode()));
 
         new AnimationTimer() {
             long lastNanoTime = System.nanoTime();
@@ -67,18 +83,18 @@ public class Main extends Application {
                 lastNanoTime = currentNanoTime;
 
                 ship.reload(elapsedTime);
-
-                gc.drawImage(earth, 0, 0);
-
-                ship.stop();
-
+//
+//                gc.drawImage(earth, 0, 0);
+//
+//                ship.stop();
+//
                 if(input.contains(KeyCode.LEFT) && input.contains(KeyCode.SPACE)) {
                     ship.left();
-                    if(ship.canFire()) bullets.add(ship.fire());
+                    if(ship.canFire()) bullets.add(fire(root, ship));
                 }
                 else if(input.contains(KeyCode.RIGHT) && input.contains(KeyCode.SPACE)) {
                     ship.right();
-                    if(ship.canFire()) bullets.add(ship.fire());
+                    if(ship.canFire()) bullets.add(fire(root, ship));
                 }
                 else if(input.contains(KeyCode.LEFT)) {
                     ship.left();
@@ -87,81 +103,89 @@ public class Main extends Application {
                     ship.right();
                 }
                 else if(input.contains(KeyCode.SPACE)) {
-                    if(ship.canFire()) bullets.add(ship.fire());
+                    if(ship.canFire()) bullets.add(fire(root, ship));
                 }
-
-                ship.update(elapsedTime);
+//
+//                ship.update(elapsedTime);
                 swarm.update(elapsedTime);
-                meter.update(ship.getLives());
-
-                bullets.stream().forEach(bullet -> {
-                    bullet.update(elapsedTime);
-                    bullet.render(gc);
-                });
+//                meter.update(ship.getLives());
 
                 Iterator<Shot> bulletIter = bullets.iterator();
 
                 while(bulletIter.hasNext()) {
                     Shot bullet = bulletIter.next();
+                    bullet.update(elapsedTime);
 
-                    if(bullet.getY() <= 30) {
+                    if(bullet.getTranslateY() <= 30) {
                         bulletIter.remove();
+                        root.getChildren().remove(bullet);
                     }
 
-                    Optional<Alien> damagedAlien = swarm.intersects(bullet);
+                    Optional<Bounds> damagedBounds = swarm.intersects(bullet);
 
-                    damagedAlien.ifPresent(alien -> {
-                        Explosion explosion = new Explosion(alien.getX() - 3, alien.getY() - 6);
+                    damagedBounds.ifPresent(bounds -> {
+                        Explosion explosion = new Explosion();
                         explosions.add(explosion);
-
+                        root.getChildren().add(explosion);
+                        explosion.setPosition(bounds.getMinX() - 3, bounds.getMinY() - 6);
+//
                         bullet.explode();
                         bulletIter.remove();
-                        score.increase(10);
+                        root.getChildren().remove(bullet);
+                        topPanel.updateScore(10);
                     });
                 }
 
-                Iterator<Shot> alienShotsIter = swarm.getShots().iterator();
-
-                while(alienShotsIter.hasNext()) {
-                    Shot bullet = alienShotsIter.next();
-
-                    if(bullet.getY() <= 30) {
-                        alienShotsIter.remove();
-                    }
-
-                    if(ship.intersects(bullet)) {
-                        ship.die();
-                        Explosion explosion = new Explosion(ship.getX() + 3, ship.getY() + 6);
-                        explosions.add(explosion);
-
-                        bullet.explode();
-                        alienShotsIter.remove();
-                    }
-                }
-
-                ship.render(gc);
-                swarm.render(gc);
-                score.render(gc);
-                meter.render(gc);
-
+//                Iterator<Shot> alienShotsIter = swarm.getShots().iterator();
+//
+//                while(alienShotsIter.hasNext()) {
+//                    Shot bullet = alienShotsIter.next();
+//
+//                    if(bullet.getY() <= 30) {
+//                        alienShotsIter.remove();
+//                    }
+//
+//                    if(ship.intersects(bullet)) {
+//                        ship.die();
+//                        Explosion explosion = new Explosion(ship.getX() + 8, ship.getY() + 9);
+//                        explosions.add(explosion);
+//
+//                        bullet.explode();
+//                        alienShotsIter.remove();
+//                    }
+//                }
+//
+//                ship.render(gc);
+//                swarm.render(gc);
+//                score.render(gc);
+//                meter.render(gc);
+//
                 Iterator<Explosion> explIter = explosions.iterator();
 
                 while(explIter.hasNext()) {
                     Explosion explosion = explIter.next();
 
-                    if(explosion.isInProgress()) {
-                        explosion.render(gc);
-                    }
-                    else {
+                    if(!explosion.isInProgress()) {
                         explIter.remove();
+                        root.getChildren().remove(explosion);
                     }
                 }
+
+//                if(ship.getLives() == 0) stop();
             }
         }.start();
 
 
         primaryStage.show();
     }
+
+    private Shot fire(Pane root, Ship ship) {
+        Shot bullet = ship.fire();
+        root.getChildren().add(bullet);
+
+        return bullet;
+    }
+
 
     public static void main(String[] args) {
         launch(args);

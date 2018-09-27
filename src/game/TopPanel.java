@@ -1,9 +1,24 @@
 package game;
 
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.HBox;
 
-public class TopPanel {
-    public TopPanel(GraphicsContext gc) {
-        Score score = new Score(gc);
+import static game.Constants.*;
+
+public class TopPanel extends HBox {
+    private Score score;
+    private LivesMeter meter;
+
+    public TopPanel() {
+        score = new Score();
+        meter = new LivesMeter();
+
+        getChildren().addAll(score, meter);
+
+        setTranslateX(LEFT_BORDER);
+        setTranslateY(BORDER);
+    }
+
+    public void updateScore(int value) {
+        score.update(value);
     }
 }

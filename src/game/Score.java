@@ -1,38 +1,29 @@
 package game;
 
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Label;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-import static game.Constants.LEFT_BORDER;
-import static game.Constants.TOP_BORDER;
-
-public class Score implements Panel {
+public class Score extends Pane {
     private static final String MSG = "SCORE: ";
 
+    private Label label;
     private int value;
-    private GraphicsContext gc;
 
-    public Score(GraphicsContext gc) {
-        this.gc = gc;
-
-        gc.setFill(Color.WHITE);
+    public Score() {
+        label = new Label();
+        label.setTextFill(Color.WHITE);
         Font font = Font.font("Courier New", FontWeight.BOLD, 24);
-        gc.setFont(font);
+        label.setFont(font);
+        label.setText(MSG);
+
+        getChildren().add(label);
     }
 
-    public void increase(int value) {
+    public void update(int value) {
         this.value += value;
-    }
-
-    @Override
-    public void render(GraphicsContext gc) {
-        gc.fillText(MSG + value, LEFT_BORDER, TOP_BORDER);
-    }
-
-    @Override
-    public void update() {
-
+        label.setText(MSG + this.value);
     }
 }

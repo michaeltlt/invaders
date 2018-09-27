@@ -1,6 +1,10 @@
 package game;
 
-public class Alien extends Sprite {
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
+
+public class Alien extends Pane {
     private static final String FILE = "file:assets/enemy.png";
     private static final double RELOAD_TIME_SEC = 2;
 
@@ -8,7 +12,9 @@ public class Alien extends Sprite {
     private boolean alive = true;
 
     public Alien() {
-        setImage(FILE);
+        Image image = new Image(FILE);
+        ImageView imageView = new ImageView(image);
+        getChildren().add(imageView);
     }
 
     public void die() {
@@ -19,12 +25,12 @@ public class Alien extends Sprite {
         return alive;
     }
 
-    public Shot fire() {
-        Shot bullet = new Plasma();
-        bullet.setPosition(getX() + getImage().getWidth() / 2, getY());
-
-        return bullet;
-    }
+//    public Shot fire() {
+//        Shot bullet = new Plasma();
+//        bullet.setPosition(getX() + getImage().getWidth() / 2, getY());
+//
+//        return bullet;
+//    }
 
     private void reload(double time) {
         reloadingTime += time;
@@ -39,9 +45,9 @@ public class Alien extends Sprite {
         return false;
     }
 
-    @Override
-    public void update(double time) {
-        super.update(time);
-        reload(time);
-    }
+//    @Override
+//    public void update(double time) {
+//        super.update(time);
+//        reload(time);
+//    }
 }

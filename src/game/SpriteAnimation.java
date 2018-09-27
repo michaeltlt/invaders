@@ -21,7 +21,8 @@ public class SpriteAnimation  extends Transition{
             Duration duration,
             int count, int columns,
             int offsetX, int offsetY,
-            int width, int height
+            int width, int height,
+            int cycleCount
     ){
         this.imageView = imageView;
         this.count = count;
@@ -31,7 +32,7 @@ public class SpriteAnimation  extends Transition{
         this.width = width;
         this.height = height;
         setCycleDuration(duration);
-        setCycleCount(Animation.INDEFINITE);
+        setCycleCount(cycleCount);
         setInterpolator(Interpolator.LINEAR);
         this.imageView.setViewport(new Rectangle2D(offsetX, offsetY, width, height));
 
@@ -43,9 +44,9 @@ public class SpriteAnimation  extends Transition{
         this.offsetY = y;
     }
     protected void interpolate(double frac) {
-        final int index = Math.min((int)Math.floor(count*frac), count-1);
-        final int x = (index%columns)*width+offsetX;
-        final int y = (index/columns)*height+offsetY;
+        final int index = Math.min((int)Math.floor(count * frac), count - 1);
+        final int x = (index % columns) * width + offsetX;
+        final int y = (index / columns) * height + offsetY;
         imageView.setViewport(new Rectangle2D(x, y, width, height));
     }
 }
