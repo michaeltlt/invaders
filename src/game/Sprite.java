@@ -94,6 +94,10 @@ public abstract class Sprite
         return image.getHeight();
     }
 
+    public Image getImage() {
+        return image;
+    }
+
     public String toString()
     {
         return " Position: [" + positionX + "," + positionY + "]"

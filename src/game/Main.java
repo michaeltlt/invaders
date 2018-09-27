@@ -2,40 +2,43 @@ package game;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Group;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
-import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import java.util.*;
+
+import static game.Constants.*;
 
 public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        primaryStage.setTitle("Canvas Example");
+        primaryStage.setTitle(TITLE);
 
         Group root = new Group();
         Scene theScene = new Scene(root);
         primaryStage.setScene(theScene);
 
-        Canvas canvas = new Canvas(800, 600);
+        Canvas canvas = new Canvas(SCREEN_WIDTH, SCREEN_HEIGHT);
         root.getChildren().add(canvas);
 
         GraphicsContext gc = canvas.getGraphicsContext2D();
         Image earth = new Image("file:assets/background.png");
 
         Ship ship = new Ship();
-        ship.setPosition(canvas.getWidth() / 2 - 24, canvas.getHeight() - 60);
+
+        Score score = new Score(gc);
+        LivesMeter meter = new LivesMeter();
 
         AlienSwarm swarm = new AlienSwarm();
-        List<Bullet> bullets = new LinkedList<>();
+        swarm.locate(ship);
+
+        List<Shot> bullets = new LinkedList<>();
         List<Explosion> explosions = new LinkedList<>();
 
 
@@ -59,13 +62,14 @@ public class Main extends Application {
 
             @Override
             public void handle(long currentNanoTime) {
-                // calculate time since last update.
+                // Calculate time since last update.
                 double elapsedTime = (currentNanoTime - lastNanoTime) / 1_000_000_000.0;
                 lastNanoTime = currentNanoTime;
 
                 ship.reload(elapsedTime);
 
                 gc.drawImage(earth, 0, 0);
+
                 ship.stop();
 
                 if(input.contains(KeyCode.LEFT) && input.contains(KeyCode.SPACE)) {
@@ -88,30 +92,57 @@ public class Main extends Application {
 
                 ship.update(elapsedTime);
                 swarm.update(elapsedTime);
+                meter.update(ship.getLives());
+
                 bullets.stream().forEach(bullet -> {
                     bullet.update(elapsedTime);
                     bullet.render(gc);
                 });
 
-                Iterator<Bullet> bulletIter = bullets.iterator();
+                Iterator<Shot> bulletIter = bullets.iterator();
 
                 while(bulletIter.hasNext()) {
-                    Bullet bullet = bulletIter.next();
+                    Shot bullet = bulletIter.next();
 
                     if(bullet.getY() <= 30) {
                         bulletIter.remove();
                     }
 
-                    Alien damagedAlien = swarm.intersects(bullet);
+                    Optional<Alien> damagedAlien = swarm.intersects(bullet);
 
-                    if(damagedAlien != null) {
-                        Explosion explosion = new Explosion(damagedAlien.getX() - 3, damagedAlien.getY() - 6);
+                    damagedAlien.ifPresent(alien -> {
+                        Explosion explosion = new Explosion(alien.getX() - 3, alien.getY() - 6);
                         explosions.add(explosion);
 
                         bullet.explode();
                         bulletIter.remove();
+                        score.increase(10);
+                    });
+                }
+
+                Iterator<Shot> alienShotsIter = swarm.getShots().iterator();
+
+                while(alienShotsIter.hasNext()) {
+                    Shot bullet = alienShotsIter.next();
+
+                    if(bullet.getY() <= 30) {
+                        alienShotsIter.remove();
+                    }
+
+                    if(ship.intersects(bullet)) {
+                        ship.die();
+                        Explosion explosion = new Explosion(ship.getX() + 3, ship.getY() + 6);
+                        explosions.add(explosion);
+
+                        bullet.explode();
+                        alienShotsIter.remove();
                     }
                 }
+
+                ship.render(gc);
+                swarm.render(gc);
+                score.render(gc);
+                meter.render(gc);
 
                 Iterator<Explosion> explIter = explosions.iterator();
 
@@ -125,9 +156,6 @@ public class Main extends Application {
                         explIter.remove();
                     }
                 }
-
-                ship.render(gc);
-                swarm.render(gc);
             }
         }.start();
 

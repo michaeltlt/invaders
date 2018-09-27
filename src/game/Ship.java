@@ -1,14 +1,22 @@
 package game;
 
+import static game.Constants.*;
+
 public class Ship extends Sprite {
     private static final String FILE = "file:assets/ship.png";
     private static final double VELOCITY = 150.0;
     private static final double RELOAD_TIME_SEC = 0.5;
 
     private double reloadingTime;
+    private int lives = LIVES;
 
     public Ship() {
         setImage(FILE);
+        reset();
+    }
+
+    public void reset() {
+        setPosition(SCREEN_WIDTH / 2 - 24, SCREEN_HEIGHT - 60);
     }
 
     public void left() {
@@ -23,8 +31,8 @@ public class Ship extends Sprite {
         setVelocity(0.0, 0.0);
     }
 
-    public Bullet fire() {
-        Bullet bullet = new Bullet();
+    public Shot fire() {
+        Shot bullet = new Bullet();
         bullet.setPosition(getX() + 19, getY());
 
         return bullet;
@@ -41,5 +49,14 @@ public class Ship extends Sprite {
         }
 
         return false;
+    }
+
+    public void die() {
+        lives--;
+        reset();
+    }
+
+    public int getLives() {
+        return lives;
     }
 }

@@ -2,6 +2,10 @@ package game;
 
 import javafx.scene.canvas.GraphicsContext;
 
+import static game.Constants.*;
+
+import java.util.*;
+
 public class AlienSwarm {
     private static final int ROWS = 5;
     private static final int COLS = 11;
@@ -9,18 +13,21 @@ public class AlienSwarm {
     private Alien[][] aliens;
 
     private double velocity = 100;
+    private double velocityDelta = 2;
     private double positionX = 154.0;
     private double positionY = 100.0;
     private double gap = 14.0;
 
     private double width;
+    private Ship ship;
+    private List<Shot> shots;
 
     public AlienSwarm() {
         aliens = new Alien[COLS][ROWS];
+        shots = new LinkedList<>();
         createAliens();
 
         width = COLS * (gap + 26);
-//        height = ROWS * (gap + 20);
     }
 
     private void createAliens() {
@@ -36,18 +43,23 @@ public class AlienSwarm {
     public void update(double time) {
         positionX += velocity * time;
 
-        if(positionX + width > 790) {
-            velocity = -100;
+        if(positionX + width > RIGHT_BORDER) {
+            velocityDelta++;
+            velocity = -100 - velocityDelta;
             positionY += gap;
         }
-        else if(positionX < 32) {
-            velocity = 100;
+        else if(positionX < LEFT_BORDER) {
+            velocityDelta++;
+            velocity = 100 + velocityDelta;
             positionY += gap;
         }
 
 
         for (int i = 0; i < COLS; i++) {
-            for (int j = 0; j < ROWS; j++) {
+            boolean columnAlreadyFire = false;
+
+            // Строки перебираются в обратном порядке для того, чтобы стрелял только последний корабль в строке
+            for (int j = ROWS - 1; j >= 0 ; j--) {
                 Alien alien = aliens[i][j];
 
                 if(alien != null) {
@@ -55,11 +67,19 @@ public class AlienSwarm {
                     double y = positionY + j * (20 + gap);
                     alien.setPosition(x, y);
 
-//                alien.setPosition(positionX + i * (32 + gap), positionY + j * (26 + gap));
                     alien.update(time);
+
+                    if(!columnAlreadyFire && x > ship.getX() && x < ship.getX() + ship.getWidth()) {
+                        if(alien.canFire()) shots.add(alien.fire());
+                        columnAlreadyFire = true;
+                    }
                 }
             }
         }
+
+        shots.stream().forEach(bullet -> {
+            bullet.update(time);
+        });
     }
 
     public void render(GraphicsContext gc) {
@@ -68,20 +88,39 @@ public class AlienSwarm {
                 if(aliens[i][j] != null) aliens[i][j].render(gc);
             }
         }
+
+        Iterator<Shot> bulletIter = shots.iterator();
+
+        while(bulletIter.hasNext()) {
+            Shot bullet = bulletIter.next();
+            bullet.render(gc);
+
+            if (bullet.getY() >= SCREEN_HEIGHT - BORDER) {
+                bulletIter.remove();
+            }
+        }
     }
 
-    public Alien intersects(Bullet bullet) {
+    public Optional<Alien> intersects(Shot bullet) {
         for (int i = 0; i < COLS; i++) {
             for (int j = 0; j < ROWS; j++) {
                 Alien alien = aliens[i][j];
 
                 if(alien != null && alien.intersects(bullet)) {
                     aliens[i][j] = null;
-                    return alien;
+                    return Optional.of(alien);
                 }
             }
         }
 
-        return null;
+        return Optional.empty();
+    }
+
+    public void locate(Ship ship) {
+        this.ship = ship;
+    }
+
+    public List<Shot> getShots() {
+        return shots;
     }
 }
