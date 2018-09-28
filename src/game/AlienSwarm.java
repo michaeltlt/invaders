@@ -1,63 +1,67 @@
 package game;
 
-import javafx.collections.ObservableListBase;
+import javafx.collections.ObservableList;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 
 import static game.Constants.*;
 
 import java.util.*;
 
-public class AlienSwarm extends GridPane {
+public class AlienSwarm extends Pane {
     private static final int ROWS = 5;
     private static final int COLS = 11;
 
-    private Alien[][] aliens;
+//    private Alien[][] aliens;
 
     private double velocity = 100;
     private double velocityDelta = 2;
     private double positionX = 144.0;
     private double positionY = 100.0;
-    private double gap = 10.0;
-    private double rowHeight = gap + 20;
+    private double gap = 20.0;
+    private double rowHeight = gap;
 
     private Ship ship;
     private List<Shot> shots;
+    private ObservableList<Node> children;
+
 
     public AlienSwarm() {
         setTranslateX(positionX);
         setTranslateY(positionY);
+        setPrefSize(COLS * (26 + gap) - 26, ROWS * (20 + gap) - 20);
+//        setBorder(new Border(new BorderStroke(Color.RED, BorderStrokeStyle.SOLID, CornerRadii.EMPTY,
+//                new BorderWidths(1))));
 
-        aliens = new Alien[COLS][ROWS];
+//        aliens = new Alien[COLS][ROWS];
         shots = new LinkedList<>();
         createAliens();
+        children = getChildren();
     }
 
     private void createAliens() {
         for (int i = 0; i < COLS; i++) {
             for (int j = 0; j < ROWS; j++) {
                 Alien alien = new Alien();
-//                alien.setTranslateX(positionX + i * (26 + gap));
-//                alien.setTranslateY(positionY + j * (20 + gap));
-                aliens[i][j] = alien;
-                add(alien, i, j);
-                setMargin(alien, new Insets(gap, gap, gap, gap));
+                alien.setTranslateX(i * (26 + gap));
+                alien.setTranslateY(j * (20 + gap));
+                getChildren().add(alien);
             }
         }
     }
 
     public void update(double time) {
         if(positionX + getWidth() > RIGHT_BORDER) {
-            velocityDelta += 1.5;
+            velocityDelta += 1.8;
             velocity = -100 - velocityDelta;
             positionY += rowHeight;
         }
         else if(positionX < LEFT_BORDER) {
-            velocityDelta += 1.5;
+            velocityDelta += 1.8;
             velocity = 100 + velocityDelta;
             positionY += rowHeight;
         }
@@ -65,8 +69,33 @@ public class AlienSwarm extends GridPane {
         setTranslateX(positionX);
         setTranslateY(positionY);
 
+        ListIterator<Node> it = children.listIterator(children.size());
+
+        while(it.hasPrevious()) {
+            Alien alien = (Alien)it.previous();
+            double x = positionX + alien.getTranslateX();
+            double y = positionY + alien.getTranslateY();
+
+            if(x > ship.getTranslateX() && x < ship.getTranslateX() + ship.getWidth()) {
+                Shot shot = alien.fire();
+                shots.add(shot);
+                children.add(shot);
+            }
+        }
+
+
         positionX += velocity * time;
 
+        Iterator<Shot> bulletIter = shots.iterator();
+
+        while(bulletIter.hasNext()) {
+            Shot bullet = bulletIter.next();
+
+            if (bullet.getY() >= SCREEN_HEIGHT - BORDER) {
+                bulletIter.remove();
+                children.remove(bullet);
+            }
+        }
 
 //        for (int i = 0; i < COLS; i++) {
 //            boolean columnAlreadyFire = false;

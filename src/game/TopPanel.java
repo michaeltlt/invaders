@@ -1,10 +1,11 @@
 package game;
 
-import javafx.scene.layout.HBox;
+import javafx.geometry.Insets;
+import javafx.scene.layout.BorderPane;
 
 import static game.Constants.*;
 
-public class TopPanel extends HBox {
+public class TopPanel extends BorderPane {
     private Score score;
     private LivesMeter meter;
 
@@ -12,7 +13,10 @@ public class TopPanel extends HBox {
         score = new Score();
         meter = new LivesMeter();
 
-        getChildren().addAll(score, meter);
+        setPrefWidth(SCREEN_WIDTH - BORDER);
+        setPadding(new Insets(0, 40, 0, 20));
+        setLeft(score);
+        setRight(meter);
 
         setTranslateX(LEFT_BORDER);
         setTranslateY(BORDER);
@@ -20,5 +24,9 @@ public class TopPanel extends HBox {
 
     public void updateScore(int value) {
         score.update(value);
+    }
+
+    public void decreaseLives() {
+        meter.decrease();
     }
 }

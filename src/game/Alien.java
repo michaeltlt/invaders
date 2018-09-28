@@ -25,12 +25,12 @@ public class Alien extends Pane {
         return alive;
     }
 
-//    public Shot fire() {
-//        Shot bullet = new Plasma();
-//        bullet.setPosition(getX() + getImage().getWidth() / 2, getY());
-//
-//        return bullet;
-//    }
+    public Shot fire() {
+        Shot bullet = new Plasma();
+        bullet.setPosition(getTranslateX() + getWidth() / 2, getTranslateY());
+
+        return bullet;
+    }
 
     private void reload(double time) {
         reloadingTime += time;
@@ -45,9 +45,12 @@ public class Alien extends Pane {
         return false;
     }
 
-//    @Override
-//    public void update(double time) {
-//        super.update(time);
-//        reload(time);
-//    }
+    @Override
+    public String toString() {
+        return "Alien{" +
+                "x = " + getTranslateX() +
+                ", y = " + getTranslateY() +
+                ", alive = " + alive +
+                '}';
+    }
 }

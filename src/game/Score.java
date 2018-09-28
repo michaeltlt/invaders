@@ -17,7 +17,7 @@ public class Score extends Pane {
         label.setTextFill(Color.WHITE);
         Font font = Font.font("Courier New", FontWeight.BOLD, 24);
         label.setFont(font);
-        label.setText(MSG);
+        label.setText(MSG + value);
 
         getChildren().add(label);
     }

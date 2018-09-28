@@ -83,11 +83,7 @@ public class Main extends Application {
                 lastNanoTime = currentNanoTime;
 
                 ship.reload(elapsedTime);
-//
-//                gc.drawImage(earth, 0, 0);
-//
-//                ship.stop();
-//
+
                 if(input.contains(KeyCode.LEFT) && input.contains(KeyCode.SPACE)) {
                     ship.left();
                     if(ship.canFire()) bullets.add(fire(root, ship));
@@ -106,7 +102,6 @@ public class Main extends Application {
                     if(ship.canFire()) bullets.add(fire(root, ship));
                 }
 //
-//                ship.update(elapsedTime);
                 swarm.update(elapsedTime);
 //                meter.update(ship.getLives());
 
@@ -154,11 +149,6 @@ public class Main extends Application {
 //                        alienShotsIter.remove();
 //                    }
 //                }
-//
-//                ship.render(gc);
-//                swarm.render(gc);
-//                score.render(gc);
-//                meter.render(gc);
 //
                 Iterator<Explosion> explIter = explosions.iterator();
 
