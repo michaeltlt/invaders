@@ -43,7 +43,7 @@ public class Ship extends Pane {
         setTranslateX(x);
     }
 
-    public Shot fire() {
+    public Shot shoot() {
         Shot bullet = new Bullet();
         bullet.setPosition(getTranslateX() + 19, getTranslateY());
 

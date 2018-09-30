@@ -27,6 +27,6 @@ public class TopPanel extends BorderPane {
     }
 
     public void decreaseLives() {
-        meter.decrease();
+        meter.down();
     }
 }

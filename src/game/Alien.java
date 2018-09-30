@@ -25,18 +25,19 @@ public class Alien extends Pane {
         return alive;
     }
 
-    public Shot fire() {
+    public Shot shoot() {
         Shot bullet = new Plasma();
-        bullet.setPosition(getTranslateX() + getWidth() / 2, getTranslateY());
+        bullet.setPosition(getParent().getTranslateX() + getTranslateX() + getWidth() / 2,
+                getParent().getTranslateY() + getTranslateY());
 
         return bullet;
     }
 
-    private void reload(double time) {
+    public void reload(double time) {
         reloadingTime += time;
     }
 
-    public boolean canFire() {
+    public boolean canShoot() {
         if(reloadingTime >= RELOAD_TIME_SEC) {
             reloadingTime = 0;
             return true;

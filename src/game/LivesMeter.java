@@ -10,7 +10,7 @@ public class LivesMeter extends HBox {
     private static final String FILE = "file:assets/life.png";
 
     private Image image;
-    private int lives;
+    private int lives = LIVES;
 
     public LivesMeter() {
         image = new Image(FILE);
@@ -24,7 +24,7 @@ public class LivesMeter extends HBox {
         }
     }
 
-    public void decrease() {
+    public void down() {
         lives--;
         getChildren().remove(lives);
     }
