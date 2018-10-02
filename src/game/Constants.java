@@ -1,5 +1,8 @@
 package game;
 
+import javafx.scene.image.Image;
+import javafx.scene.media.Media;
+
 public final class Constants {
     private Constants() {}
 
@@ -14,4 +17,10 @@ public final class Constants {
     public static final double TOP_BORDER = BORDER;
 
     public static final int LIVES = 3;
+
+    public static final Image BG_IMAGE = new Image("file:assets/background.png");
+
+    private String bgMusicFile = "StayTheNight.mp3";     // For example
+//    Media sound = new Media(new File(musicFile).toURI().toString());
+//    public static final Media BG_SOUND = new Media("file:assets/sounds/amb_doomdrones_mood_repeater_04.wav");
 }

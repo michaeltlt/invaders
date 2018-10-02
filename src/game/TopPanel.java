@@ -29,4 +29,8 @@ public class TopPanel extends BorderPane {
     public void decreaseLives() {
         meter.down();
     }
+
+    public int getScore() {
+        return score.get();
+    }
 }

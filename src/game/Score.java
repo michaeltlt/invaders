@@ -26,4 +26,8 @@ public class Score extends Pane {
         this.value += value;
         label.setText(MSG + this.value);
     }
+
+    public int get() {
+        return value;
+    }
 }

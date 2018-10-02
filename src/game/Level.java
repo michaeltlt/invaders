@@ -1,28 +1,22 @@
 package game;
 
-import javafx.animation.AnimationTimer;
 import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 import java.util.*;
 
+import static game.Constants.BG_IMAGE;
 import static game.Constants.SCREEN_HEIGHT;
 import static game.Constants.SCREEN_WIDTH;
 
 public class Level {
     private Scene scene;
     private Ship ship;
-    private LivesMeter meter;
     private AlienSwarm swarm;
     private TopPanel topPanel;
     private List<Shot> shipShots;
@@ -30,16 +24,19 @@ public class Level {
     private List<Explosion> explosions;
     private Set<KeyCode> input;
     private ObservableList<Node> nodes;
+    private Pane root;
+
+    private boolean done;
+
 
     public Level() {
-        Pane root = new Pane();
-        prepareLevel(root);
-
+        root = new Pane();
         scene = new Scene(root);
+
+        init();
 
         swarmShots = new LinkedList<>();
         explosions = new LinkedList<>();
-
 
         input = new HashSet<>();
         Set<KeyCode> validCodes = new HashSet<>();
@@ -54,138 +51,131 @@ public class Level {
         });
 
         scene.setOnKeyReleased(event -> input.remove(event.getCode()));
+    }
 
-        new AnimationTimer() {
-            long lastNanoTime = System.nanoTime();
+    public void update(double elapsedTime) {
+        handleKeys();
 
-            @Override
-            public void handle(long currentNanoTime) {
-                // Calculate time since last update.
-                double elapsedTime = (currentNanoTime - lastNanoTime) / 1_000_000_000.0;
-                lastNanoTime = currentNanoTime;
+        ship.reload(elapsedTime);
+        swarm.update(elapsedTime);
 
-                handleKeys(root);
+        Optional<Shot> alienShot = swarm.shoot();
 
-                ship.reload(elapsedTime);
-                swarm.update(elapsedTime);
+        if(alienShot.isPresent()) {
+            nodes.add(alienShot.get());
+            swarmShots.add(alienShot.get());
+        }
 
-                Optional<Shot> alienShot = swarm.shoot();
+        Iterator<Shot> bulletIter = shipShots.iterator();
 
-                if(alienShot.isPresent()) {
-                    nodes.add(alienShot.get());
-                    swarmShots.add(alienShot.get());
-                }
+        while(bulletIter.hasNext()) {
+            Shot bullet = bulletIter.next();
+            bullet.update(elapsedTime);
 
-                Iterator<Shot> bulletIter = shipShots.iterator();
-
-                while(bulletIter.hasNext()) {
-                    Shot bullet = bulletIter.next();
-                    bullet.update(elapsedTime);
-
-                    if(bullet.getTranslateY() <= 30) {
-                        bulletIter.remove();
-                        nodes.remove(bullet);
-                    }
-
-                    Optional<Bounds> damagedBounds = swarm.intersects(bullet);
-
-                    damagedBounds.ifPresent(bounds -> {
-                        Explosion explosion = new Explosion();
-                        explosions.add(explosion);
-                        nodes.add(explosion);
-                        explosion.setPosition(bounds.getMinX() - 3, bounds.getMinY() - 6);
-//
-                        bullet.explode();
-                        bulletIter.remove();
-                        nodes.remove(bullet);
-                        topPanel.updateScore(10);
-                    });
-                }
-
-                Iterator<Shot> swarmShotsIter = swarmShots.iterator();
-
-                while(swarmShotsIter.hasNext()) {
-                    Shot bullet = swarmShotsIter.next();
-
-                    bullet.update(elapsedTime);
-
-                    if(bullet.getTranslateY() >= SCREEN_HEIGHT) {
-                        swarmShotsIter.remove();
-                        nodes.remove(bullet);
-                    }
-
-                    if(ship.getBoundsInParent().intersects(bullet.getBoundsInParent())) {
-                        ship.die();
-                        topPanel.decreaseLives();
-                        Explosion explosion = new Explosion();
-                        explosion.setPosition(ship.getTranslateX() + 8, ship.getTranslateY() + 9);
-                        explosions.add(explosion);
-                        nodes.add(explosion);
-
-                        bullet.explode();
-                        swarmShotsIter.remove();
-                        nodes.remove(bullet);
-                    }
-                }
-
-                Iterator<Explosion> explIter = explosions.iterator();
-
-                while(explIter.hasNext()) {
-                    Explosion explosion = explIter.next();
-
-                    if(!explosion.isInProgress()) {
-                        explIter.remove();
-                        nodes.remove(explosion);
-                    }
-                }
-
-                if(ship.getLives() == 0) {
-                    nodes.removeAll(ship, swarm);
-                    nodes.removeAll(shipShots);
-                    nodes.removeAll(swarmShots);
-
-                    printGameOver(root);
-                    stop();
-                }
+            if(bullet.getTranslateY() <= 30) {
+                bulletIter.remove();
+                nodes.remove(bullet);
             }
-        }.start();
+
+            Optional<Bounds> damagedBounds = swarm.intersects(bullet);
+
+            damagedBounds.ifPresent(bounds -> {
+                Explosion explosion = new Explosion();
+                explosions.add(explosion);
+                nodes.add(explosion);
+                explosion.setPosition(bounds.getMinX() - 3, bounds.getMinY() - 6);
+//
+                bullet.explode();
+                bulletIter.remove();
+                nodes.remove(bullet);
+                topPanel.updateScore(10);
+            });
+        }
+
+        Iterator<Shot> swarmShotsIter = swarmShots.iterator();
+
+        while(swarmShotsIter.hasNext()) {
+            Shot bullet = swarmShotsIter.next();
+
+            bullet.update(elapsedTime);
+
+            if(bullet.getTranslateY() >= SCREEN_HEIGHT) {
+                swarmShotsIter.remove();
+                nodes.remove(bullet);
+            }
+
+            if(ship.getBoundsInParent().intersects(bullet.getBoundsInParent())) {
+                ship.die();
+                topPanel.decreaseLives();
+                Explosion explosion = new Explosion();
+                explosion.setPosition(ship.getTranslateX() + 8, ship.getTranslateY() + 9);
+                explosions.add(explosion);
+                nodes.add(explosion);
+
+                bullet.explode();
+                swarmShotsIter.remove();
+                nodes.remove(bullet);
+            }
+        }
+
+        Iterator<Explosion> explIter = explosions.iterator();
+
+        while(explIter.hasNext()) {
+            Explosion explosion = explIter.next();
+
+            if(!explosion.isInProgress()) {
+                explIter.remove();
+                nodes.remove(explosion);
+            }
+        }
+
+        if(ship.getLives() == 0) {
+            nodes.removeAll(ship, swarm);
+            nodes.removeAll(shipShots);
+            nodes.removeAll(swarmShots);
+            done = true;
+//                    printGameOver(root);
+//            stop();
+        }
     }
 
     public Scene getScene() {
         return scene;
     }
 
-    private void prepareLevel(Pane root) {
+    public boolean isDone() {
+        return done;
+    }
+
+    private void init() {
         nodes = root.getChildren();
         nodes.clear();
         root.setPrefSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 
         ship = new Ship();
-        meter = new LivesMeter();
         swarm = new AlienSwarm();
         swarm.locate(ship);
         topPanel = new TopPanel();
         shipShots = new LinkedList<>();
 
-        setBackground(root);
+        setBackground();
 
         nodes.addAll(ship, swarm, topPanel);
     }
 
-    private void setBackground(Pane root) {
-        Image bgImage = new Image("file:assets/background.png");
-        ImageView imageView = new ImageView(bgImage);
+    private void setBackground() {
+        ImageView imageView = new ImageView(BG_IMAGE);
         root.getChildren().add(imageView);
     }
 
-    private void handleKeys(Pane root) {
+    private void handleKeys() {
         if(input.contains(KeyCode.LEFT) && input.contains(KeyCode.SPACE)) {
             ship.left();
-            if(ship.canFire()) shipShots.add(fire(root, ship));
+            if(ship.canFire()) shipShots.add(shoot(root, ship));
         }
         else if(input.contains(KeyCode.RIGHT) && input.contains(KeyCode.SPACE)) {
             ship.right();
-            if(ship.canFire()) shipShots.add(fire(root, ship));
+            if(ship.canFire()) shipShots.add(shoot(root, ship));
         }
         else if(input.contains(KeyCode.LEFT)) {
             ship.left();
@@ -194,26 +184,18 @@ public class Level {
             ship.right();
         }
         else if(input.contains(KeyCode.SPACE)) {
-            if(ship.canFire()) shipShots.add(fire(root, ship));
+            if(ship.canFire()) shipShots.add(shoot(root, ship));
         }
     }
 
-    private Shot fire(Pane root, Ship ship) {
+    private Shot shoot(Pane root, Ship ship) {
         Shot bullet = ship.shoot();
         root.getChildren().add(bullet);
 
         return bullet;
     }
 
-    private void printGameOver(Pane root) {
-        Label label = new Label();
-        label.setTextFill(Color.WHITE);
-        Font font = Font.font("Courier New", FontWeight.BOLD, 54);
-        label.setFont(font);
-        label.setText("GAME OVER");
-        label.setTranslateX(SCREEN_WIDTH / 2 - 150);
-        label.setTranslateY(SCREEN_HEIGHT / 2 - 40);
-
-        root.getChildren().add(label);
+    public int getScore() {
+        return topPanel.getScore();
     }
 }
