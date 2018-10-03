@@ -6,6 +6,10 @@ import javafx.stage.Stage;
 
 import static game.Constants.*;
 
+// Space Invaders game.
+// Controls:
+// Left and Right arrows - movement
+// Space - shooting
 public class Main extends Application {
 
     private State state = State.LEVEL;
