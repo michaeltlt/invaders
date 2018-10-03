@@ -30,6 +30,7 @@ sourceSets {
 
 
 jar {
+    archiveName 'invaders.jar'
     manifest {
         attributes("Implementation-Title": project.name,
                 "Implementation-Version": version,

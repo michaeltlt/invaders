@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import java.net.URL?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="game.LevelController"
+            prefHeight="600.0" prefWidth="800.0">
+
+    <stylesheets>
+        <URL value="@level.css" />
+    </stylesheets>
+
+    <BorderPane fx:id="infoPanel" prefHeight="50.0" prefWidth="800.0">
+        <left>
+            <HBox>
+                <Label styleClass="score" text="SCORE: "></Label>
+                <Label styleClass="score" fx:id="scoreLabel" text="0"></Label>
+            </HBox>
+        </left>
+
+        <right>
+            <HBox fx:id="livesMeter"></HBox>
+        </right>
+    </BorderPane>
+
+</AnchorPane>
