@@ -1,4 +1,4 @@
-# Space Invagers game
+# Space Invaders game
 
 This application is a JavaFX technology example, intended for educational purposes.
 
